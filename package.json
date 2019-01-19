@@ -1,0 +1,27 @@
+{
+  "name": "computer-science-in-javascript",
+  "version": "1.0.0",
+  "description": "Computer Science related Algorithms and Data Structures implemented by JavaScript.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhengminhui/computer-science-in-javascript.git"
+  },
+  "keywords": [
+    "javascript"
+  ],
+  "author": "minhui zheng",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zhengminhui/computer-science-in-javascript/issues"
+  },
+  "homepage": "https://github.com/zhengminhui/computer-science-in-javascript#readme",
+  "devDependencies": {
+    "eslint": "^5.12.1",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0"
+  }
+}
