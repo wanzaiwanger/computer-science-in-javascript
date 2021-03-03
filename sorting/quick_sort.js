@@ -1,4 +1,7 @@
 function quicksort(arr, low, high) {
+  if (arr.length <= 1) {
+    return arr;
+  }
   if (low < high) {
     //  pivot is partitioning index, arr[pivot] is now at right place
     const pi = partition(arr, low, high);
@@ -26,28 +29,24 @@ function partition(arr, low, high) {
   // index of smaller element and indicates the
   // right position of pivot found so far
   let i = low - 1;
-  for (let j = low; j < high - 1; j++) {
+  for (let j = low; j <= high - 1; j++) {
     if (arr[j] < pivot) {
-      // console.log("swap", pivot, arr[i], arr[j]);
       i++;
       swap(arr, i, j);
     }
   }
-  console.log("mid1", arr);
   swap(arr, i + 1, high);
-  console.log("mid2", arr);
   return i + 1;
 }
 
 function swap(arr, i, j) {
-  console.log("swap", arr[i], arr[j]);
   const temp = arr[i];
   arr[i] = arr[j];
   arr[j] = temp;
 }
 
-const arr = [10, 80, 30, 90, 40, 50, 70];
+const arr = [10, 7, 8, 9, 1, 5];
 const low = 0;
 const high = arr.length - 1;
-quicksort(arr, low, high);
-console.log("final", arr);
+const sorted = quicksort(arr, low, high);
+console.log("final", sorted);
