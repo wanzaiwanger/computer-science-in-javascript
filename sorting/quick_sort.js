@@ -40,6 +40,9 @@ function partition(arr, low, high) {
 }
 
 function swap(arr, i, j) {
+  if (i === j) {
+    return;
+  }
   const temp = arr[i];
   arr[i] = arr[j];
   arr[j] = temp;
