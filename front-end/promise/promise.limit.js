@@ -1,3 +1,73 @@
+function batchLimit(arr, concurrent) {
+  const resolvedArr = [];
+
+  return new Promise((resolveBatch, reject) => {
+    // doneTaskNum 记录的是已经遍历的任务的位置
+    let doneTaskNum = 0;
+
+    // 生成一个新的线程
+    function thread(threadId) {
+      return new Promise((resolveThread, reject) => {
+        // 在当前线程中,通过递归向 microTaskQueue 中添加任务
+        function enqueue() {
+          const cur = arr.shift();
+          // finalArrIndex 记录的是，在最终结果数组里的位置，
+          // 因为异步任务返回时间不确定，需要提前保存该任务的位置信息
+          const finalArrIndex = doneTaskNum;
+          doneTaskNum++;
+
+          if (cur) {
+            const task = cur();
+
+            task['task']
+              .then((res) => {
+                console.log(`thread ${threadId} finished a task: ${task.id}`, {
+                  finalArrIndex,
+                  doneTaskNum,
+                });
+                resolvedArr[finalArrIndex] = res;
+                enqueue();
+              })
+              .catch((err) => {
+                resolvedArr[finalArrIndex] = err;
+                enqueue();
+              });
+          } else {
+            resolveThread();
+          }
+        }
+        enqueue();
+      });
+    }
+
+    // 待线程池里所有数据返回才返回最终结果
+    let pool = [];
+    for (let id = 0; id < concurrent; id++) {
+      pool.push(thread(id));
+    }
+    return Promise.all(pool).then(() => {
+      resolveBatch(resolvedArr);
+    });
+  });
+}
+
+// const tasks = createTasks(16);
+const tasks = [
+  () => timer(10),
+  () => timer(1),
+  () => timer(2),
+  () => timer(3),
+  () => timer(4),
+  () => timer(4),
+  () => timer(3),
+  () => timer(2),
+  () => timer(1),
+];
+const concurrent = 2;
+batchLimit(tasks, concurrent).then((res) => {
+  console.log('batch', res);
+});
+
 function timer(time) {
   const p = new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -11,72 +81,11 @@ function timer(time) {
   };
 }
 
-function batchLimit(arr, concurrent) {
-  const resolvedArr = [];
-  const len = arr.length;
-
-  return new Promise((resolve, reject) => {
-    let index = 0;
-
-    function enqueue() {
-      const cur = arr.shift();
-      // 不能在这里自增
-      // index++;
-      // 当cur 已经是undefined的时候，index 还是小于len的
-      if (cur && index <= len) {
-        console.log('get a new one', cur, index);
-        cur.task
-          .then((res) => {
-            console.log('finished ', res, index, len);
-            resolvedArr[index] = res;
-            index++;
-            if (index === len) {
-              console.log('all done', index, len);
-              resolve(resolvedArr);
-            } else {
-              enqueue();
-            }
-          })
-          .catch((err) => {
-            resolvedArr[index] = err;
-            enqueue();
-          });
-      }
-    }
-
-    for (let i = 0; i < concurrent; i++) {
-      enqueue();
-    }
-  });
+function createTasks(num) {
+  const arr = [];
+  for (let i = num; i > 0; i--) {
+    const fn = () => timer(i);
+    arr.push(fn);
+  }
+  return arr;
 }
-
-const arr = [
-  // timer(15),
-  // timer(14),
-  // timer(13),
-  // timer(15),
-  // timer(14),
-  // timer(13),
-  // timer(15),
-  // timer(14),
-  // timer(13),
-  // timer(12),
-  // timer(11),
-  timer(10),
-  timer(9),
-  timer(8),
-  timer(7),
-  timer(6),
-  timer(5),
-  timer(4),
-  timer(3),
-  timer(2),
-  timer(1),
-  // timer(15),
-  // timer(14),
-  // timer(13),
-];
-
-batchLimit(arr, 2).then((res) => {
-  console.log('batch', res);
-});
